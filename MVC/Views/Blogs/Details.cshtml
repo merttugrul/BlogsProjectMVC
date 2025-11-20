@@ -1,0 +1,39 @@
+@model APP.Models.BlogResponse
+
+@{
+    ViewData["Title"] = "Blog Details";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h3>@Model.Title</h3>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Author</dt>
+            <dd class="col-sm-9">@Model.UserName</dd>
+
+            <dt class="col-sm-3">Publish Date</dt>
+            <dd class="col-sm-9">@Model.PublishDateF</dd>
+
+            <dt class="col-sm-3">Rating</dt>
+            <dd class="col-sm-9">@Model.RatingF</dd>
+
+            <dt class="col-sm-3">Tags</dt>
+            <dd class="col-sm-9">@Model.TagNames</dd>
+
+            <dt class="col-sm-3">Content</dt>
+            <dd class="col-sm-9">
+                <div class="border p-3 bg-light">
+                    @Model.Content
+                </div>
+            </dd>
+        </dl>
+    </div>
+    <div class="card-footer">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>

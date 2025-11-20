@@ -1,0 +1,71 @@
+@model APP.Models.BlogRequest
+
+@{
+    ViewData["Title"] = "Create Blog";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Content" class="form-label"></label>
+                <textarea asp-for="Content" class="form-control" rows="10"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Rating" class="form-label"></label>
+                <select asp-for="Rating" class="form-select">
+                    <option value="">-- Select Rating --</option>
+                    <option value="1">1 - Poor</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="3">3 - Good</option>
+                    <option value="4">4 - Very Good</option>
+                    <option value="5">5 - Excellent</option>
+                </select>
+                <span asp-validation-for="Rating" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PublishDate" class="form-label"></label>
+                <input asp-for="PublishDate" type="date" class="form-control" />
+                <span asp-validation-for="PublishDate" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="UserId" class="form-label"></label>
+                <select asp-for="UserId" class="form-select" asp-items="ViewBag.Users">
+                    <option value="">-- Select Author --</option>
+                </select>
+                <span asp-validation-for="UserId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="TagIds" class="form-label"></label>
+                <select asp-for="TagIds" class="form-select" asp-items="ViewBag.Tags" multiple>
+                </select>
+                <small class="form-text text-muted">Hold Ctrl (Cmd on Mac) to select multiple tags</small>
+                <span asp-validation-for="TagIds" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Create</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

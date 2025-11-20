@@ -1,0 +1,27 @@
+@model APP.Models.TagResponse
+
+@{
+    ViewData["Title"] = "Delete Tag";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="alert alert-danger">
+    <h4>Are you sure you want to delete this tag?</h4>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Tag Name</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+        </dl>
+    </div>
+    <div class="card-footer">
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

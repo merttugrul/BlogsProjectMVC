@@ -1,0 +1,47 @@
+@model APP.Models.UserResponse
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<h1>User Details</h1>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.UserName)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.UserName)</dd>
+        
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FullName)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.FullName)</dd>
+        
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.GenderF)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.GenderF)</dd>
+        
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.BirthDateF)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.BirthDateF)</dd>
+        
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.RegistrationDateF)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.RegistrationDateF)</dd>
+        
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ScoreF)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.ScoreF)</dd>
+        
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.IsActiveF)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.IsActiveF)</dd>
+        
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Address)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Address)</dd>
+        
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.GroupTitle)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.GroupTitle)</dd>
+        
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.RoleNames)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.RoleNames)</dd>
+    </dl>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>
