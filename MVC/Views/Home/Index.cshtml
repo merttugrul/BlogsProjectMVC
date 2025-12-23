@@ -6,3 +6,24 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+@if (ViewBag.RecentBlogs != null && ViewBag.RecentBlogs.Count > 0)
+{
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <h3>Recently Viewed Blogs</h3>
+            <hr />
+            <div class="list-group">
+                @foreach (var blog in ViewBag.RecentBlogs)
+                {
+                    <a href="@Url.Action("Details", "Blogs", new { id = blog.Id })" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">@blog.Title</h5>
+                            <small class="text-muted">@blog.ViewedAt</small>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+}

@@ -4,17 +4,19 @@ using CORE.APP.Services.MVC;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
+using APP.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MVC.Controllers
 {
     public class UsersController : Controller
     {
-        private readonly IService<UserRequest, UserResponse> _userService;
+        private readonly UserService _userService;
         private readonly IService<GroupRequest, GroupResponse> _groupService;
         private readonly IService<RoleRequest, RoleResponse> _roleService;
 
         public UsersController(
-            IService<UserRequest, UserResponse> userService,
+            UserService userService,
             IService<GroupRequest, GroupResponse> groupService,
             IService<RoleRequest, RoleResponse> roleService)
         {
@@ -131,6 +133,66 @@ namespace MVC.Controllers
             var result = _userService.Delete(id);
             TempData["Message"] = result.Message;
             return RedirectToAction(nameof(Index));
+        }
+
+        // Authentication Actions
+
+        // GET: Users/Login
+        [AllowAnonymous]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: Users/Login
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(UserLoginRequest user)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _userService.Login(user);
+                if (result.IsSuccessful)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                ModelState.AddModelError("", result.Message);
+            }
+            return View(user);
+        }
+
+        // GET: Users/Logout
+        public async Task<IActionResult> Logout()
+        {
+            await _userService.Logout();
+            return RedirectToAction("Index", "Home");
+        }
+
+        // GET: Users/Register
+        [AllowAnonymous]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        // POST: Users/Register
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
+        public IActionResult Register(UserRegisterRequest user)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = _userService.Register(user);
+                if (result.IsSuccessful)
+                {
+                    TempData["Message"] = result.Message;
+                    return RedirectToAction(nameof(Login));
+                }
+                ModelState.AddModelError("", result.Message);
+            }
+            return View(user);
         }
     }
 }

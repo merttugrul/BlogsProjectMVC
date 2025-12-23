@@ -3,25 +3,36 @@ using APP.Models;
 using CORE.APP.Models;
 using CORE.APP.Services;
 using CORE.APP.Services.MVC;
+using CORE.APP.Services.Authentication.MVC;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace APP.Services
 {
     public class UserService : Service<User>, IService<UserRequest, UserResponse>
     {
-        public UserService(DbContext db) : base(db)
+        private readonly ICookieAuthService _cookieAuthService;
+
+        public UserService(DbContext db, ICookieAuthService cookieAuthService) : base(db)
         {
+            _cookieAuthService = cookieAuthService;
+        }
+
+        protected override IQueryable<User> Query(bool isNoTracking = true)
+        {
+            return base.Query(isNoTracking).Include(u => u.Group)
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role);
+
         }
 
         public List<UserResponse> List()
         {
             var query = Query()
-                .Include(u => u.Group)
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+                
                 .Select(u => new UserResponse
                 {
                     Id = u.Id,
@@ -56,9 +67,7 @@ namespace APP.Services
         public UserResponse Item(int id)
         {
             var entity = Query()
-                .Include(u => u.Group)
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+                
                 .SingleOrDefault(u => u.Id == id);
             
             if (entity == null)
@@ -107,7 +116,7 @@ namespace APP.Services
                 LastName = request.LastName?.Trim(),
                 Gender = request.Gender,
                 BirthDate = request.BirthDate,
-                RegistrationDate = request.RegistrationDate,
+                RegistrationDate = DateTime.Now,
                 Score = request.Score,
                 IsActive = request.IsActive,
                 Address = request.Address?.Trim(),
@@ -135,7 +144,7 @@ namespace APP.Services
                 return Error("User with the same username already exists!");
             
             var entity = Query(false)
-                .Include(u => u.UserRoles)
+                
                 .SingleOrDefault(u => u.Id == request.Id);
             
             if (entity == null)
@@ -147,7 +156,7 @@ namespace APP.Services
             entity.LastName = request.LastName?.Trim();
             entity.Gender = request.Gender;
             entity.BirthDate = request.BirthDate;
-            entity.RegistrationDate = request.RegistrationDate;
+            
             entity.Score = request.Score;
             entity.IsActive = request.IsActive;
             entity.Address = request.Address?.Trim();
@@ -156,7 +165,7 @@ namespace APP.Services
             entity.GroupId = request.GroupId;
             
             // Many-to-Many: Eski UserRole kayıtlarını sil, yenilerini ekle
-            entity.UserRoles.Clear();
+            Delete(entity.UserRoles);
             if (request.RoleIds != null && request.RoleIds.Any())
             {
                 entity.UserRoles = request.RoleIds.Select(roleId => new UserRole
@@ -173,12 +182,12 @@ namespace APP.Services
         public CommandResponse Delete(int id)
         {
             var entity = Query(false)
-                .Include(u => u.UserRoles)
+                
                 .SingleOrDefault(u => u.Id == id);
             
             if (entity == null)
                 return Error("User not found!");
-            
+            Delete(entity.UserRoles);
             Delete(entity);
             return Success("User deleted successfully.", entity.Id);
         }
@@ -186,7 +195,7 @@ namespace APP.Services
         public UserRequest Edit(int id)
         {
             var entity = Query()
-                .Include(u => u.UserRoles)
+                
                 .SingleOrDefault(u => u.Id == id);
             
             if (entity == null)
@@ -210,6 +219,54 @@ namespace APP.Services
                 GroupId = entity.GroupId,
                 RoleIds = entity.UserRoles.Select(ur => ur.RoleId).ToList()
             };
+        }
+
+        // Authentication:
+        /// <summary>
+        /// Authenticates a user using the provided login credentials and initiates a cookie-based sign-in.
+        /// </summary>
+        public async Task<CommandResponse> Login(UserLoginRequest request)
+        {
+            var entity = Query().SingleOrDefault(
+                u => u.UserName == request.UserName
+                  && u.Password == request.Password
+                  && u.IsActive);
+
+            if (entity is null)
+                return Error("Invalid user name or password!");
+
+            await _cookieAuthService.SignIn(
+                entity.Id,
+                entity.UserName,
+                entity.UserRoles.Select(ur => ur.Role.Name).ToArray());
+
+            return Success("User logged in successfully.", entity.Id);
+        }
+
+        /// <summary>
+        /// Signs out the currently authenticated user by removing the authentication cookie.
+        /// </summary>
+        public async Task Logout()
+        {
+            await _cookieAuthService.SignOut();
+        }
+
+        /// <summary>
+        /// Registers a new user with the default "User" role and "Active" status.
+        /// </summary>
+        public CommandResponse Register(UserRegisterRequest request)
+        {
+            var roleEntity = Query<Role>().SingleOrDefault(r => r.Name == "User");
+            if (roleEntity is null)
+                return Error("\"User\" role not found!");
+
+            return Create(new UserRequest
+            {
+                UserName = request.UserName,
+                Password = request.Password,
+                IsActive = true,
+                RoleIds = new List<int> { roleEntity.Id }
+            });
         }
     }
 }

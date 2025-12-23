@@ -1,24 +1,30 @@
 using APP.Models;
 using CORE.APP.Services.MVC;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using APP.Services;
 
 namespace MVC.Controllers
 {
+    [Authorize]
     public class BlogsController : Controller
     {
         private readonly IService<BlogRequest, BlogResponse> _blogService;
         private readonly IService<UserRequest, UserResponse> _userService;
         private readonly IService<TagRequest, TagResponse> _tagService;
+        private readonly IRecentBlogsService _recentBlogsService;
 
         public BlogsController(
             IService<BlogRequest, BlogResponse> blogService,
             IService<UserRequest, UserResponse> userService,
-            IService<TagRequest, TagResponse> tagService)
+            IService<TagRequest, TagResponse> tagService,
+            IRecentBlogsService recentBlogsService)
         {
             _blogService = blogService;
             _userService = userService;
             _tagService = tagService;
+            _recentBlogsService = recentBlogsService;
         }
 
         // GET: Blogs
@@ -34,6 +40,8 @@ namespace MVC.Controllers
             var item = _blogService.Item(id);
             if (item == null)
                 return NotFound();
+            
+            _recentBlogsService.AddRecentBlog(item.Id, item.Title); 
             return View(item);
         }
 
